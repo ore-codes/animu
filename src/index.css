@@ -10,11 +10,11 @@
   --color-brand-cyan: #00d4ff;
   --color-brand-gold: #ffd166;
   --color-brand-text: #e8eaf6;
-  --color-brand-muted: #6b6f8a;
+  --color-brand-muted: #8f95b2;
   
   --font-bebas: "Bebas Neue", sans-serif;
-  --font-noto: "Noto Sans JP", sans-serif;
-  --font-space: "Space Mono", monospace;
+  --font-outfit: "Outfit", sans-serif;
+  --font-space: "Sono", monospace;
   
   --radius-sm: 4px;
 }
@@ -27,7 +27,7 @@
   body {
     background-color: var(--color-brand-bg);
     color: var(--color-brand-text);
-    font-family: var(--font-noto);
+    font-family: var(--font-outfit);
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;

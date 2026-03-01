@@ -1,3 +1,4 @@
+import { Sparkles, Star } from "lucide-react";
 import { type AnimeItem } from "../../lib/types";
 import { cn } from "../../lib/utils";
 
@@ -44,8 +45,8 @@ export function AnimeCard({ anime }: AnimeCardProps) {
           loading="lazy"
         />
       ) : (
-        <div className="w-full aspect-[3/4] bg-brand-surface2 flex items-center justify-center text-brand-muted text-3xl">
-          ✦
+        <div className="w-full aspect-[3/4] bg-brand-surface2 flex items-center justify-center text-brand-muted">
+          <Sparkles className="w-10 h-10 opacity-30" />
         </div>
       )}
       <div className="p-3.5">
@@ -56,8 +57,15 @@ export function AnimeCard({ anime }: AnimeCardProps) {
           <span>
             {anime.type || "—"} · {anime.episodes ? `${anime.episodes} eps` : "?"}
           </span>
-          <span className="text-brand-gold font-bold">
-            {anime.score ? `★ ${anime.score}` : "—"}
+          <span className="text-brand-gold font-bold flex items-center gap-1">
+            {anime.score ? (
+              <>
+                <Star className="w-3 h-3 fill-current" />
+                {anime.score}
+              </>
+            ) : (
+              "—"
+            )}
           </span>
         </div>
       </div>

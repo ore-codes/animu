@@ -1,4 +1,4 @@
-import type { AnimeSearchResponse } from "../../lib/types";
+import type { AnimeItem, AnimeSearchResponse } from "../../lib/types";
 import type { Episode, EpisodesResponse } from "./types";
 
 export async function searchAnimeForArc(query: string): Promise<AnimeSearchResponse> {
@@ -12,6 +12,21 @@ export async function searchAnimeForArc(query: string): Promise<AnimeSearchRespo
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+export async function fetchEpisodesWithSynopses(anime: AnimeItem): Promise<Episode[]> {
+  const [fetchedEps, kitsuSynopses] = await Promise.all([
+    fetchAllEpisodes(anime.mal_id),
+    fetchKitsuEpisodes(anime.mal_id)
+  ]);
+  
+  return fetchedEps.map((ep: Episode) => {
+    const epNum = ep.mal_id;
+    if (kitsuSynopses[epNum]) {
+      return { ...ep, synopsis: kitsuSynopses[epNum] };
+    }
+    return ep;
+  });
+}
 
 export async function fetchAllEpisodes(animeId: number): Promise<Episode[]> {
   let episodes: Episode[] = [];
@@ -66,7 +81,8 @@ export async function fetchKitsuEpisodes(malId: number): Promise<Record<number, 
     const kitsuId = itemData.data.id;
     
     // 3. Fetch episodes for this Kitsu ID
-    let episodesList: Record<string, any>[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let episodesList: any[] = [];
     let nextUrl = `https://kitsu.io/api/edge/anime/${kitsuId}/episodes?page[limit]=20`;
 
     while (nextUrl) {

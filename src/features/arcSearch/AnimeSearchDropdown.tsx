@@ -1,3 +1,4 @@
+import { Search, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -77,7 +78,7 @@ export function AnimeSearchDropdown({ onSelect }: AnimeSearchDropdownProps) {
           onKeyDown={(e) => e.key === "Enter" && handleForceSearch()}
         />
         <Button variant="icon" onClick={handleForceSearch}>
-          🔍
+          <Search className="w-4 h-4" />
         </Button>
       </div>
 
@@ -103,9 +104,10 @@ export function AnimeSearchDropdown({ onSelect }: AnimeSearchDropdownProps) {
                   <div className="text-[0.82rem] whitespace-nowrap overflow-hidden text-ellipsis">
                     {anime.title}
                   </div>
-                  <div className="text-[0.65rem] text-brand-muted font-space mt-0.5">
+                  <div className="text-[0.65rem] text-brand-muted font-space mt-0.5 flex items-center gap-1">
                     {anime.type || ""} ·{" "}
-                    {anime.episodes ? `${anime.episodes} eps` : "?"} · ★
+                    {anime.episodes ? `${anime.episodes} eps` : "?"} · 
+                    <Star className="w-3 h-3 fill-current inline-block" />
                     {anime.score || "?"}
                   </div>
                 </div>
