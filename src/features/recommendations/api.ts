@@ -18,7 +18,7 @@ export async function fetchAnimeRecommendations(
   const base = "https://api.jikan.moe/v4/anime";
   const params = new URLSearchParams();
   params.set("page", page.toString());
-  params.set("limit", "24");
+  params.set("limit", "20");
   params.set("sfw", "true");
 
   if (filters.title) params.set("q", filters.title);

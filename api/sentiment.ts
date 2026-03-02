@@ -43,7 +43,7 @@ const responseSchema: Schema = {
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS setup
+  // CORS setup 
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");

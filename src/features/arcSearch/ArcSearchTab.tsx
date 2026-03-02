@@ -5,8 +5,9 @@ import { Input } from "../../components/ui/Input";
 import { Spinner } from "../../components/ui/Spinner";
 import { showToast } from "../../components/ui/Toast";
 import { type AnimeItem } from "../../lib/types";
+import { askAiForArc, type AiSearchResponse } from "./aiSearchApi";
 import { AnimeSearchDropdown } from "./AnimeSearchDropdown";
-import { fetchAllEpisodes, fetchKitsuEpisodes } from "./api";
+import { fetchFranchiseEpisodes } from "./api";
 import { EpisodeMatchList } from "./EpisodeMatchList";
 import { SelectedAnimeDisplay } from "./SelectedAnimeDisplay";
 import { type Episode } from "./types";
@@ -17,12 +18,16 @@ export function ArcSearchTab() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [aiData, setAiData] = useState<AiSearchResponse | null>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   const handleSelectAnime = (anime: AnimeItem) => {
     setSelectedAnime(anime);
     setEpisodes([]);
     setQuery("");
     setHasSearched(false);
+    setAiData(null);
+    setIsAiLoading(false);
   };
 
   const clearSelectedAnime = () => {
@@ -30,6 +35,8 @@ export function ArcSearchTab() {
     setEpisodes([]);
     setQuery("");
     setHasSearched(false);
+    setAiData(null);
+    setIsAiLoading(false);
   };
 
   const handleSearchArc = async () => {
@@ -44,31 +51,33 @@ export function ArcSearchTab() {
 
     setLoading(true);
     setHasSearched(true);
+    setAiData(null);
+    setIsAiLoading(false);
 
     try {
       // Fetch all episodes if not currently loaded for this anime
       if (episodes.length === 0) {
-        // Run both fetching functions concurrently
-        const [fetchedEps, kitsuSynopses] = await Promise.all([
-          fetchAllEpisodes(selectedAnime.mal_id),
-          fetchKitsuEpisodes(selectedAnime.mal_id)
-        ]);
-        
-        // Merge Kitsu synopses into Jikan episodes
-        const mergedEps = fetchedEps.map((ep: Episode) => {
-          const epNum = ep.mal_id;
-          if (kitsuSynopses[epNum]) {
-            return { ...ep, synopsis: kitsuSynopses[epNum] };
-          }
-          return ep;
-        });
-        
-        setEpisodes(mergedEps);
+        // Run fetch across the whole franchise explicitly to combine seasons
+        const allEps = await fetchFranchiseEpisodes(selectedAnime);
+        setEpisodes(allEps);
       }
     } catch {
       showToast("Failed to load episodes. Try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAskAi = async () => {
+    if (!selectedAnime || !query.trim() || episodes.length === 0) return;
+    setIsAiLoading(true);
+    try {
+      const result = await askAiForArc(selectedAnime.title, query, episodes);
+      setAiData(result);
+    } catch {
+      showToast("AI Deep Search failed. Please try again.");
+    } finally {
+      setIsAiLoading(false);
     }
   };
 
@@ -118,7 +127,7 @@ export function ArcSearchTab() {
       {/* Right Panel */}
       <div className="min-h-[400px]">
         {loading ? (
-          <Spinner label="LOADING EPISODES..." />
+          <Spinner label="FETCHING FRANCHISE EPISODES (MAY TAKE A MOMENT)..." />
         ) : !selectedAnime ? (
           <EmptyState
             title="SELECT"
@@ -129,7 +138,13 @@ export function ArcSearchTab() {
             Enter a search term to find episodes.
           </div>
         ) : (
-          <EpisodeMatchList query={query} episodes={episodes} />
+          <EpisodeMatchList 
+            query={query} 
+            episodes={episodes}
+            onAskAi={handleAskAi}
+            isAiLoading={isAiLoading}
+            aiData={aiData}
+          />
         )}
       </div>
     </div>

@@ -10,11 +10,11 @@ export function SelectedAnimeDisplay({ anime, onChange }: SelectedAnimeDisplayPr
     <div className="flex bg-brand-surface2 border border-brand-border p-4 mb-4 items-center gap-4">
       <img
         src={anime.images?.jpg?.image_url || ""}
-        alt={anime.title}
+        alt={anime.title_english || anime.title}
         className="w-[50px] h-[70px] object-cover rounded-[2px]"
       />
       <div>
-        <div className="text-[0.9rem] font-bold">{anime.title}</div>
+        <div className="text-[0.9rem] font-bold">{anime.title_english || anime.title}</div>
         <div className="text-[0.7rem] text-brand-muted font-space mt-1">
           MAL ID: {anime.mal_id} · {anime.episodes || "?"} episodes
         </div>

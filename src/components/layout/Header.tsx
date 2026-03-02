@@ -39,7 +39,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           ◈ Arc Search
         </Button>
       </nav>
-      <nav className="flex flex-wrap items-center gap-1 lg:hidden mt-4 bg-surface2/50 p-1 rounded-lg w-full">
+      <nav className="flex flex-wrap items-center gap-1 lg:hidden mt-4 bg-brand-surface2/50 p-1 rounded-lg w-full">
         <Button
           variant="nav-tab"
           active={activeTab === "recommend"}

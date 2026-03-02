@@ -93,7 +93,6 @@ export function FilterPanel({
             Sort By
           </label>
           <Select name="order" value={filters.order} onChange={handleChange}>
-            <option value="popularity">Popularity</option>
             <option value="score">Highest Score</option>
             <option value="rank">Rank</option>
             <option value="members">Most Members</option>

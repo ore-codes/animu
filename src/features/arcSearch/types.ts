@@ -4,6 +4,7 @@ export interface Episode {
   title_japanese?: string;
   title_romanji?: string;
   synopsis?: string;
+  animeTitle?: string;
 }
 
 export interface EpisodesResponse {

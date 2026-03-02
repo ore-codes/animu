@@ -18,13 +18,17 @@ export function AnimeSearchDropdown({ onSelect }: AnimeSearchDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     if (!debouncedQuery) {
-      setResults([]);
-      setIsOpen(false);
+      setTimeout(() => {
+        if (isMounted) {
+          setResults([]);
+          setIsOpen(false);
+        }
+      }, 0);
       return;
     }
-
-    let isMounted = true;
     searchAnimeForArc(debouncedQuery)
       .then((data) => {
         if (isMounted) {
@@ -97,12 +101,12 @@ export function AnimeSearchDropdown({ onSelect }: AnimeSearchDropdownProps) {
               >
                 <img
                   src={anime.images?.jpg?.image_url || ""}
-                  alt={anime.title}
+                  alt={anime.title_english || anime.title}
                   className="w-8 h-11 object-cover rounded-[2px] shrink-0 bg-brand-surface"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="text-[0.82rem] whitespace-nowrap overflow-hidden text-ellipsis">
-                    {anime.title}
+                    {anime.title_english || anime.title}
                   </div>
                   <div className="text-[0.65rem] text-brand-muted font-space mt-0.5 flex items-center gap-1">
                     {anime.type || ""} ·{" "}

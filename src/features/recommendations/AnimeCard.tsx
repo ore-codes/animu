@@ -41,7 +41,7 @@ export function AnimeCard({ anime }: AnimeCardProps) {
         <img
           className="w-full aspect-[3/4] object-cover block bg-brand-surface2"
           src={imgUrl}
-          alt={anime.title}
+          alt={anime.title_english || anime.title}
           loading="lazy"
         />
       ) : (
@@ -51,7 +51,7 @@ export function AnimeCard({ anime }: AnimeCardProps) {
       )}
       <div className="p-3.5">
         <div className="text-[0.85rem] font-bold leading-tight mb-1.5 line-clamp-2">
-          {anime.title}
+          {anime.title_english || anime.title}
         </div>
         <div className="flex items-center justify-between font-space text-[0.65rem] text-brand-muted">
           <span>

@@ -14,18 +14,111 @@ export async function searchAnimeForArc(query: string): Promise<AnimeSearchRespo
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function fetchEpisodesWithSynopses(anime: AnimeItem): Promise<Episode[]> {
-  const [fetchedEps, kitsuSynopses] = await Promise.all([
-    fetchAllEpisodes(anime.mal_id),
-    fetchKitsuEpisodes(anime.mal_id)
-  ]);
-  
-  return fetchedEps.map((ep: Episode) => {
-    const epNum = ep.mal_id;
-    if (kitsuSynopses[epNum]) {
-      return { ...ep, synopsis: kitsuSynopses[epNum] };
+  const allEps = await fetchFranchiseEpisodes(anime);
+  return allEps;
+}
+
+export async function fetchFranchiseEpisodes(baseAnime: AnimeItem): Promise<Episode[]> {
+  const baseAnimeId = baseAnime.mal_id;
+  try {
+    // 1. Traverse the franchise tree using BFS to find all related seasons
+    const relatedIds = new Set<number>([baseAnimeId]);
+    const queue: number[] = [baseAnimeId];
+    
+    // Map to store ID -> Title so we know which season each episode belongs to
+    const titleMap = new Map<number, string>();
+    titleMap.set(baseAnimeId, baseAnime.title_english || baseAnime.title);
+    
+    // Safety cap to avoid infinite loops or massive franchises (e.g., Fate, Pokemon) filling the queue
+    let iterations = 0;
+    const MAX_FRANCHISE_ENTRIES = 12; 
+
+    while (queue.length > 0 && iterations < MAX_FRANCHISE_ENTRIES) {
+      const currentId = queue.shift()!;
+      iterations++;
+      
+      const relationsRes = await fetch(`https://api.jikan.moe/v4/anime/${currentId}/relations`);
+      
+      if (!relationsRes.ok) {
+        if (relationsRes.status === 429) {
+          await sleep(1500);
+          queue.unshift(currentId); // Re-queue and try again
+          continue;
+        }
+        continue;
+      }
+      
+      const relationsData = await relationsRes.json();
+      if (relationsData.data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        relationsData.data.forEach((relation: any) => {
+          // Pull from the main storyline
+          if (["Sequel", "Prequel", "Parent story", "Side story"].includes(relation.relation)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            relation.entry.forEach((entry: any) => {
+              if (entry.type === "anime" && !relatedIds.has(entry.mal_id)) {
+                relatedIds.add(entry.mal_id);
+                queue.push(entry.mal_id);
+                titleMap.set(entry.mal_id, entry.name);
+              }
+            });
+          }
+        });
+      }
+      
+      // Sleep to prevent hitting rate limits during the crawl
+      await sleep(400);
     }
-    return ep;
-  });
+    
+    // Sort IDs to generally fetch older seasons first (lower MAL ID usually means older)
+    const sortedIds = Array.from(relatedIds).sort((a, b) => a - b);
+
+    // 2. Fetch episodes for all related IDs
+    let allEpisodes: Episode[] = [];
+    
+    for (const malId of sortedIds) {
+      const [fetchedEps, kitsuSynopses] = await Promise.all([
+        fetchAllEpisodes(malId),
+        fetchKitsuEpisodes(malId)
+      ]);
+      
+      const mergedEps = fetchedEps.map((ep: Episode) => {
+        const epNum = ep.mal_id;
+        const mappedEp = { ...ep, animeTitle: titleMap.get(malId) };
+        if (kitsuSynopses[epNum]) {
+          return { ...mappedEp, synopsis: kitsuSynopses[epNum] };
+        }
+        return mappedEp;
+      });
+
+      // Adjust the episode numbers so they don't reset to 1 every season for the UI display.
+      // E.g., if Season 1 has 25 eps, Season 2 ep 1 becomes ep 26 globally if possible.
+      // But for simplicity of matching across data, we just append them.
+      allEpisodes = allEpisodes.concat(mergedEps);
+      
+      // Safety throttle between seasons
+      await sleep(1000); 
+    }
+
+    return allEpisodes;
+
+  } catch (error) {
+    console.error("Failed to fetch franchise episodes:", error);
+    // Fallback to just the base season
+    const [fetchedEps, kitsuSynopses] = await Promise.all([
+      fetchAllEpisodes(baseAnimeId),
+      fetchKitsuEpisodes(baseAnimeId)
+    ]);
+    
+    return fetchedEps.map((ep: Episode) => {
+      const epNum = ep.mal_id;
+      const mappedEp = { ...ep, animeTitle: baseAnime.title_english || baseAnime.title };
+      if (kitsuSynopses[epNum]) {
+        return { ...mappedEp, synopsis: kitsuSynopses[epNum] };
+      }
+      return mappedEp;
+    });
+  }
 }
 
 export async function fetchAllEpisodes(animeId: number): Promise<Episode[]> {

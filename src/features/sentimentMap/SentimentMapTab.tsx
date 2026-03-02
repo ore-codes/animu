@@ -69,7 +69,7 @@ export function SentimentMapTab() {
     <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 h-full min-h-[600px]">
       {/* Left Panel: Controls */}
       <div className="w-full lg:w-[350px] shrink-0 flex flex-col gap-6">
-        <div className="bg-surface2/50 border border-white/5 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
+        <div className="bg-brand-surface2/50 border border-white/5 rounded-xl p-4 sm:p-6 backdrop-blur-sm">
           <h2 className="font-bebas text-2xl tracking-wider text-pink mb-4">Sentiment Map</h2>
           <p className="text-sm text-text/80 leading-relaxed mb-6 font-space">
             Discover the emotional trajectory of an anime. Our AI will analyze the synopsis of every episode and graph whether it is dark and tragic (-1) or wholesome and triumphant (+1).
@@ -108,7 +108,7 @@ export function SentimentMapTab() {
       </div>
 
       {/* Right Panel: The Graph and Summary */}
-      <div className="flex-1 min-h-[400px] bg-surface2/30 border border-white/5 rounded-xl p-4 sm:p-6 backdrop-blur-sm relative overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-[400px] bg-brand-surface2/30 border border-white/5 rounded-xl p-4 sm:p-6 backdrop-blur-sm relative overflow-hidden flex flex-col">
         {loading ? (
           <div className="absolute inset-0 z-10 bg-surface/80 backdrop-blur-sm flex items-center justify-center">
             <Spinner label="Analyzing Synopses with AI..." />
