@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# Animu
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Animu is an open-source web application built for the anime community to solve the problem of managing and exploring long-running shows.
 
-Currently, two official plugins are available:
+You can try it live here: [https://animu.net](https://animu.net)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+### Arc Search (Franchise-Wide)
+When an anime takes a long break or you fall behind, it is hard to remember exactly where you stopped watching. Searching for specific events across hundreds of episodes is painful. 
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+Animu allows you to search for vague plot points (e.g., "Killua met Biski"). The **Arc Search** pulls data for the entire anime franchise automatically—crawling related seasons, prequels, and sequels—and ranks the episodes by relevance to help you find the exact episode you need.
 
-## Expanding the ESLint configuration
+### Sentiment Map
+It is often difficult to figure out if a new show is worth continuing or if its tone matches what you want to watch. 
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The **Sentiment Map** feature uses AI to read the synopsis of every episode in a series and grades the emotional tone. The app then graphs these scores over the course of the show. If a viewer wants to know if an anime stays lighthearted or eventually turns dark, they can see the overall emotional arc at a glance before they decide to start watching.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Deep AI Search
+If the local keyword matching in the Arc Search does not find the episode you are looking for, you can escalate the query to the **Ask AI Deep Search**. This leverages the Gemini 2.5 Flash model, combined with the episode context, to find the exact match and provide an explanation.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Tech Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **Frontend:** React, TypeScript, Tailwind CSS, Recharts
+- **APIs:** 
+  - [Jikan API](https://jikan.moe/) (Unofficial MyAnimeList API) for anime metadata and franchise relations
+  - [Kitsu API](https://kitsu.docs.apiary.io/) for episode synopses
+- **AI Integration:** Google Gemini API (gemini-2.5-flash) via `@google/generative-ai`
+- **Hosting / Backend:** Vercel (Frontend & Serverless Functions)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+To run this project locally, you will need a Google Gemini API Key.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file in the root directory and add your Gemini API key (this is used by the Vercel serverless functions in development):
+   ```env
+   GEMINI_API_KEY=your_api_key_here
+   ```
+4. Start the development server using the Vercel CLI to ensure the serverless functions work:
+   ```bash
+   npx vercel dev
+   ```
+
+## Architecture
+
+- The application uses client-side data fetching for the Jikan and Kitsu APIs to reduce server load.
+- It utilizes client-side caching (`localStorage`) for AI responses to speed up repeated queries and save API quota.
+- API keys are secured behind Vercel Serverless Functions to prevent client-side exposure.
+
+## License
+
+MIT
