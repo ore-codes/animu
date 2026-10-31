@@ -39,12 +39,12 @@ export function Footer() {
   );
 }
 
-/** Vertical episode ribbon: 第N話 reads "episode N". */
-export function Ribbon({ order, small = false }: { order: number; small?: boolean }) {
+/** Vertical episode ribbon: 第N話 reads "episode N". Without an order it asks where you are. */
+export function Ribbon({ order, small = false }: { order: number | null; small?: boolean }) {
   return (
     <div className={`ribbon${small ? ' ribbon-sm' : ''}`} aria-hidden="true">
-      <span className="display">第{order}話</span>
-      {!small && <span className="note">あなたはここ</span>}
+      <span className="display">第{order ?? '？'}話</span>
+      {!small && <span className="note">{order == null ? 'あなたはどこ' : 'あなたはここ'}</span>}
     </div>
   );
 }

@@ -18,6 +18,7 @@ export type ShowStatus = {
 };
 
 export type Recap = { order: number; title: string; kind: string; recap: string; source: 'ai' | 'synopsis' };
+export type EpisodeMapData = { total: number; marks: { order: number; kind: string }[] };
 export type Upcoming = { order: number; kind: string; title?: string };
 
 /** A failed call. `status` lets screens choose a calm message instead of showing raw text. */
@@ -56,6 +57,7 @@ export const api = {
   find: (tvmazeId: number, query: string) => request<FindResult>('/api/find', post({ tvmazeId, query })),
   recaps: (id: number, upTo: number, count: number) =>
     request<{ recaps: Recap[] }>(`/api/shows/${id}/recap?upTo=${upTo}&count=${count}`).then((r) => r.recaps),
+  map: (id: number) => request<EpisodeMapData>(`/api/shows/${id}/map`),
   upcoming: (id: number, after: number, reveal: boolean) =>
     request<{ upcoming: Upcoming[] }>(`/api/shows/${id}/upcoming?after=${after}&reveal=${reveal ? 1 : 0}`).then((r) => r.upcoming),
 };

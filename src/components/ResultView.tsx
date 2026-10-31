@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import type { FindResult } from '@/server/search/find';
 import { api, ApiError, type Upcoming } from '@/lib/api';
 import { useBookmarks } from '@/lib/bookmarks';
+import { EpisodeMap } from './EpisodeMap';
 import { BookmarkIcon, Ribbon } from './Logo';
 import { RecapDrawer } from './RecapDrawer';
 
@@ -222,6 +223,8 @@ export function ResultView({ tvmazeId, query }: { tvmazeId: number; query: strin
                   Episode numbers count every season in airing order.
                 </div>
               </article>
+
+              <EpisodeMap tvmazeId={tvmazeId} title={title} at={best.order} atLabel="Your match" />
 
               {matches.length > 1 && (
                 <section className="others" aria-labelledby="others-title">
