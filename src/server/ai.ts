@@ -8,6 +8,7 @@ export type JsonSchema = {
   required?: string[];
   enum?: string[];
   format?: string;
+  description?: string;
 };
 
 const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';

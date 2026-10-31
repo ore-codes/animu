@@ -9,7 +9,7 @@ const schema: JsonSchema = {
       items: {
         type: 'OBJECT',
         properties: {
-          order: { type: 'INTEGER' },
+          order: { type: 'INTEGER', description: 'The episode number exactly as written after "Episode" in the list, never the position in the list.' },
           confidence: { type: 'STRING', format: 'enum', enum: ['high', 'medium', 'low'] },
           reason: { type: 'STRING' },
         },
