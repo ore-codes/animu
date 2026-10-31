@@ -26,7 +26,20 @@ function buildTicks(map: EpisodeMapData, at: number | null, maxTicks: number): T
  * Every episode of a show in order, drawn from the real data. With `at`, everything before it counts
  * as watched and that spot is marked. Orange ticks are recap or filler episodes.
  */
-export function EpisodeMap({ tvmazeId, title, at = null, atLabel = 'You are here' }: { tvmazeId: number; title: string; at?: number | null; atLabel?: string }) {
+export function EpisodeMap({
+  tvmazeId,
+  title,
+  at = null,
+  atLabel = 'You are here',
+  compact = false,
+}: {
+  tvmazeId: number;
+  title: string;
+  at?: number | null;
+  atLabel?: string;
+  /** For small cards: just the strip and its end numbers, since the card already says where you are. */
+  compact?: boolean;
+}) {
   const [map, setMap] = useState<EpisodeMapData | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -61,14 +74,15 @@ export function EpisodeMap({ tvmazeId, title, at = null, atLabel = 'You are here
   const ticks = useMemo(() => (map ? buildTicks(map, at, maxTicks) : []), [map, at, maxTicks]);
 
   if (failed || (map && map.total === 0)) return null;
-  if (!map) return <div className="strip-section" style={{ minHeight: 120 }} aria-busy="true" />;
+  if (!map) return <div className={`strip-section${compact ? ' strip-compact' : ''}`} style={{ minHeight: compact ? 56 : 120 }} aria-busy="true" />;
 
   const here = at != null && at <= map.total ? at : null;
   const pos = here ? Math.min(Math.max(((here - 0.5) / map.total) * 100, 12), 88) : 0;
   const extras = map.marks.length;
 
   return (
-    <section className="strip-section" aria-label={`${title}: every episode in order`}>
+    <section className={`strip-section${compact ? ' strip-compact' : ''}`} aria-label={`${title}: every episode in order`}>
+      {!compact && (
       <div className="strip-legend">
         <span style={{ fontWeight: 700, color: 'var(--sumi)' }}>{title}, every episode in order</span>
         <span>
@@ -81,6 +95,7 @@ export function EpisodeMap({ tvmazeId, title, at = null, atLabel = 'You are here
           {extras > 0 && <b style={{ color: '#8a6200' }}>Recap or filler</b>}
         </span>
       </div>
+      )}
       <div
         ref={stripRef}
         className="strip"
@@ -95,7 +110,7 @@ export function EpisodeMap({ tvmazeId, title, at = null, atLabel = 'You are here
         <span className="strip-end" style={{ left: 0 }}>
           1
         </span>
-        {here && (
+        {here && !compact && (
           <span className="note strip-here" style={{ left: `${pos}%` }}>
             ここだ！ Episode {here}
           </span>

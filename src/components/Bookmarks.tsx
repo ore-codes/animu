@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { timeAgo, useBookmarks, type Bookmark } from '@/lib/bookmarks';
+import { EpisodeMap } from './EpisodeMap';
 import { RecapDrawer } from './RecapDrawer';
 
 const TONES = ['var(--kaki)', 'var(--asagi)', 'var(--yamabuki)'];
@@ -52,6 +53,7 @@ export function Bookmarks() {
                   第{b.order}話
                 </span>
               </div>
+              <EpisodeMap tvmazeId={b.tvmazeId} title={b.title} at={b.order} atLabel="You are here" compact />
               <div className="bookmark-actions">
                 <button className="btn btn-soft btn-small" onClick={() => setRecapFor(b)}>
                   Previously on

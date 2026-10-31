@@ -3,8 +3,6 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useId, useRef, useState } from 'react';
 import { api, type ShowHit } from '@/lib/api';
-import { useBookmarks } from '@/lib/bookmarks';
-import { EpisodeMap } from './EpisodeMap';
 
 const NUDGES = ['A character I met', 'A big fight', 'An arc name'];
 
@@ -27,8 +25,6 @@ export function Finder() {
   const [memory, setMemory] = useState('');
   const [error, setError] = useState<string | null>(null);
   const memoryRef = useRef<HTMLTextAreaElement>(null);
-  const { bookmarks } = useBookmarks();
-  const bookmarkAt = picked ? (bookmarks.find((b) => b.tvmazeId === picked.tvmazeId)?.order ?? null) : null;
 
   // "Move bookmark" links here with the show already chosen.
   useEffect(() => {
@@ -199,12 +195,6 @@ export function Finder() {
           </div>
         </div>
       </form>
-
-      {picked?.status === 'ready' ? (
-        <EpisodeMap tvmazeId={picked.tvmazeId} title={picked.title} at={bookmarkAt} atLabel="Your bookmark" />
-      ) : (
-        <p className="strip-hint">Pick a show and you’ll see all its episodes in order here, with your place marked.</p>
-      )}
     </>
   );
 }

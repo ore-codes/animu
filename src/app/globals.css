@@ -102,7 +102,6 @@ textarea.input { min-height: 100px; padding: 16px; resize: vertical; line-height
 .finder-actions .small { font-size: 15px; color: #544c44; }
 
 .strip-section { margin-top: 40px; }
-.strip-hint { margin-top: 40px; font-size: 14px; color: var(--muted); text-align: center; }
 .strip-legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 12px; font-size: 14px; color: #544c44; }
 .strip { display: flex; align-items: flex-end; gap: 2px; height: 60px; }
 .strip i { flex: 1 1 0; min-width: 0; height: 30px; border-radius: 1px; background: rgba(34,29,46,0.2); }
@@ -111,6 +110,12 @@ textarea.input { min-height: 100px; padding: 16px; resize: vertical; line-height
 .strip .tick-here { height: 60px; background: var(--kaki); }
 .strip-axis { position: relative; height: 36px; border-top: 2px solid var(--sumi); }
 .strip-axis span { position: absolute; top: 6px; font-size: 13px; color: var(--muted); }
+.strip-compact { margin-top: 0; }
+.strip-compact .strip { height: 36px; }
+.strip-compact .strip i { height: 18px; }
+.strip-compact .strip .tick-here { height: 36px; }
+.strip-compact .strip-axis { height: 24px; }
+.strip-compact .strip-axis span { top: 3px; font-size: 12px; }
 .strip-axis .strip-here { transform: translateX(-50%); font-size: 15px; color: var(--kaki); white-space: nowrap; }
 
 .section { padding-top: 40px; padding-bottom: 16px; }
@@ -120,7 +125,7 @@ textarea.input { min-height: 100px; padding: 16px; resize: vertical; line-height
 .bookmark { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
 .bookmark-head { display: flex; align-items: center; gap: 14px; }
 .avatar { flex: none; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--sumi); border-radius: 6px; font-family: var(--font-display), serif; font-weight: 800; font-size: 26px; color: var(--page); }
-.bookmark-at { display: flex; align-items: baseline; justify-content: space-between; padding-top: 12px; border-top: 1.5px dashed var(--line); }
+.bookmark-at { display: flex; align-items: baseline; gap: 12px; padding-top: 12px; border-top: 1.5px dashed var(--line); }
 .bookmark-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .bookmark-actions .btn { flex: 1 1 120px; }
 .empty { padding: 28px; text-align: center; }
