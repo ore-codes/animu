@@ -1,0 +1,14 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: animu
+      POSTGRES_PASSWORD: animu
+      POSTGRES_DB: animu
+    ports:
+      - "5433:5432"
+    volumes:
+      - animu-db:/var/lib/postgresql/data
+
+volumes:
+  animu-db:

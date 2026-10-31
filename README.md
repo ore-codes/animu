@@ -1,56 +1,53 @@
 # Animu
 
-Animu is an open-source web application built for the anime community to solve the problem of managing and exploring long-running shows.
+Find the episode you left off at. Pick a show, describe a scene you half remember, and Animu names the likely episode with no spoilers past it.
 
-You can try it live here: [https://animu.net](https://animu.net)
+This branch is the v2 backend. The interface is not built yet; the designs are in `docs/DESIGN.md`.
 
-## Features
+## How it works
 
-### Arc Search (Franchise-Wide)
-When an anime takes a long break or you fall behind, it is hard to remember exactly where you stopped watching. Searching for specific events across hundreds of episodes is painful. 
+- `ingest` reads a show's episodes once from TVmaze and Kitsu, keeps the source with more usable synopses, embeds each episode, and stores everything in Postgres with pgvector.
+- `find` embeds the description and returns the closest episodes. With AI configured, a re-rank step orders them and adds a reason and a confidence.
+- `recap` returns "previously on" for the episodes before a position, each written only from that episode's own synopsis.
+- Nothing at request time calls TVmaze or Kitsu except show search.
 
-Animu allows you to search for vague plot points (e.g., "Killua met Biski"). The **Arc Search** pulls data for the entire anime franchise automatically—crawling related seasons, prequels, and sequels—and ranks the episodes by relevance to help you find the exact episode you need.
+Measured quality on the spike scenes is in `docs/SPIKE.md`. Without AI the right episode is in the top 3 for about three quarters of scenes.
 
-### Sentiment Map
-It is often difficult to figure out if a new show is worth continuing or if its tone matches what you want to watch. 
+## Run it
 
-The **Sentiment Map** feature uses AI to read the synopsis of every episode in a series and grades the emotional tone. The app then graphs these scores over the course of the show. If a viewer wants to know if an anime stays lighthearted or eventually turns dark, they can see the overall emotional arc at a glance before they decide to start watching.
+```bash
+cp .env.example .env
+npm install
+npm run db:up          # Postgres with pgvector on port 5433
+npm run db:migrate
+npm run ingest -- "hunter x hunter" 2011
+npm run dev
+```
 
-### Deep AI Search
-If the local keyword matching in the Arc Search does not find the episode you are looking for, you can escalate the query to the **Ask AI Deep Search**. This leverages the Gemini 2.5 Flash model, combined with the episode context, to find the exact match and provide an explanation.
+## API
 
-## Tech Stack
+| Route | Purpose |
+|---|---|
+| `GET /api/shows/search?q=` | Find anime by title, with whether each is ready |
+| `POST /api/shows/:id/prepare` | Start reading a show. Returns at once |
+| `GET /api/shows/:id` | Status and progress while preparing |
+| `POST /api/find` | `{ tvmazeId, query }` returns up to 3 matches and the kinds of the next 5 episodes |
+| `GET /api/shows/:id/recap?upTo=N&count=3` | Recaps for the episodes before N |
+| `GET /api/shows/:id/upcoming?after=N&reveal=1` | Next 5 episodes; titles only when revealed |
 
-- **Frontend:** React, TypeScript, Tailwind CSS, Recharts
-- **APIs:** 
-  - [Jikan API](https://jikan.moe/) (Unofficial MyAnimeList API) for anime metadata and franchise relations
-  - [Kitsu API](https://kitsu.docs.apiary.io/) for episode synopses
-- **AI Integration:** Google Gemini API (gemini-2.5-flash) via `@google/generative-ai`
-- **Hosting / Backend:** Vercel (Frontend & Serverless Functions)
+POST routes only accept the site's own origin. Every route is rate limited per address, and AI calls stop at `AI_DAILY_CALL_LIMIT` per day, after which results fall back to meaning search only.
 
-## Getting Started
+## Test
 
-To run this project locally, you will need a Google Gemini API Key.
+```bash
+npm test                                                    # unit tests
+DATABASE_URL=postgres://animu:animu@localhost:5433/animu npm test   # plus database tests
+npm run calibrate                                           # score the spike scenes against the database
+```
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file in the root directory and add your Gemini API key (this is used by the Vercel serverless functions in development):
-   ```env
-   GEMINI_API_KEY=your_api_key_here
-   ```
-4. Start the development server using the Vercel CLI to ensure the serverless functions work:
-   ```bash
-   npx vercel dev
-   ```
+## Embeddings
 
-## Architecture
-
-- The application uses client-side data fetching for the Jikan and Kitsu APIs to reduce server load.
-- It utilizes client-side caching (`localStorage`) for AI responses to speed up repeated queries and save API quota.
-- API keys are secured behind Vercel Serverless Functions to prevent client-side exposure.
+Development uses a small local model. Production should use the hosted provider (`EMBEDDING_PROVIDER=gemini`) because the local model is too heavy for a serverless function. Vectors record which model made them, and search only compares vectors from the current model, so switching means re-running ingest for every show.
 
 ## License
 

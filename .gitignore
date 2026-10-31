@@ -24,3 +24,10 @@ dist-ssr
 *.sw?
 
 .vercel
+
+.env
+.env.local
+.next
+next-env.d.ts
+spike/data
+*.tsbuildinfo
