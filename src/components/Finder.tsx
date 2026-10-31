@@ -89,7 +89,8 @@ export function Finder() {
           {picked ? (
             <div className="picked">
               <span className="title">
-                {picked.title}
+                {picked.englishTitle ?? picked.title}
+                {picked.englishTitle && <span className="muted" style={{ fontWeight: 400 }}> · {picked.title}</span>}
                 {picked.year ? <span className="muted" style={{ fontWeight: 400 }}> ({picked.year})</span> : null}
               </span>
               <button type="button" className="btn btn-small" onClick={() => setPicked(null)} style={{ marginLeft: 'auto' }}>
@@ -128,7 +129,9 @@ export function Finder() {
                     <li key={s.tvmazeId}>
                       <button type="button" className="result-btn" onClick={() => choose(s)}>
                         <span>
-                          {s.title} {s.year && <span className="muted">({s.year})</span>}
+                          {s.englishTitle ?? s.title}{' '}
+                          {s.englishTitle && <span className="muted">· {s.title}</span>}{' '}
+                          {s.year && <span className="muted">({s.year})</span>}
                         </span>
                         {statusChip(s)}
                       </button>

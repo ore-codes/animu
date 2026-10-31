@@ -10,5 +10,6 @@ export type SourceName = 'tvmaze' | 'kitsu';
 export type ShowHit = {
   tvmazeId: number;
   title: string;
+  englishTitle?: string | null;
   year: number | null;
 };

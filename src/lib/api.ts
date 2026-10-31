@@ -3,6 +3,7 @@ import type { FindResult } from '@/server/search/find';
 export type ShowHit = {
   tvmazeId: number;
   title: string;
+  englishTitle?: string | null;
   year: number | null;
   status: 'missing' | 'preparing' | 'ready' | 'failed';
   episodeCount: number | null;

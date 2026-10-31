@@ -20,6 +20,7 @@ export const GET = handle(async (req) => {
     shows: hits.map((h) => ({
       tvmazeId: h.tvmazeId,
       title: h.title,
+      englishTitle: h.englishTitle ?? null,
       year: h.year,
       status: byId.get(h.tvmazeId)?.status ?? 'missing',
       episodeCount: byId.get(h.tvmazeId)?.episode_count ?? null,

@@ -9,12 +9,34 @@ type TvmazeEpisode = { name: string; summary: string | null; type: string; airst
 
 const yearOf = (d: string | null) => (d ? Number(d.slice(0, 4)) : null);
 
+const ENGLISH = new Set(['US', 'GB', 'CA', 'AU']);
+const englishTitles = new Map<number, string | null>();
+
+/** TVmaze keeps the English release title as an alternate name, so a search in English can show it. */
+async function englishTitle(id: number, title: string): Promise<string | null> {
+  if (!englishTitles.has(id)) {
+    const show = await getJson<{ _embedded?: { akas: { name: string; country: { code: string } | null }[] } }>(
+      `${BASE}/shows/${id}?embed=akas`,
+    ).catch(() => null);
+    if (!show) return null;
+    englishTitles.set(id, show._embedded?.akas.find((a) => a.country && ENGLISH.has(a.country.code))?.name ?? null);
+  }
+  const name = englishTitles.get(id) ?? null;
+  return name && name.toLowerCase() !== title.toLowerCase() ? name : null;
+}
+
 /** Anime only: TVmaze marks them Animation with a Japanese original language. */
 export async function searchShows(query: string): Promise<ShowHit[]> {
   const hits = await getJson<{ show: TvmazeShow }[]>(`${BASE}/search/shows?q=${encodeURIComponent(query)}`);
-  return hits
-    .filter(({ show }) => show.language === 'Japanese' && show.type === 'Animation')
-    .map(({ show }) => ({ tvmazeId: show.id, title: show.name, year: yearOf(show.premiered) }));
+  const anime = hits.filter(({ show }) => show.language === 'Japanese' && show.type === 'Animation');
+  return Promise.all(
+    anime.map(async ({ show }) => ({
+      tvmazeId: show.id,
+      title: show.name,
+      englishTitle: await englishTitle(show.id, show.name),
+      year: yearOf(show.premiered),
+    })),
+  );
 }
 
 /** Null when the id is not an anime, so the prepare endpoint cannot be used to ingest arbitrary shows. */
