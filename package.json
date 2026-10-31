@@ -12,10 +12,10 @@
     "db:up": "docker compose up -d db",
     "db:migrate": "tsx --env-file=.env scripts/migrate.ts",
     "ingest": "tsx --env-file=.env scripts/ingest.ts",
-    "calibrate": "tsx --env-file=.env scripts/calibrate.ts"
+    "calibrate": "tsx --env-file=.env scripts/calibrate.ts",
+    "check:gemini": "tsx --env-file=.env scripts/check-gemini.ts"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@huggingface/transformers": "^3.7.0",
     "next": "^15.5.0",
     "postgres": "^3.4.7",

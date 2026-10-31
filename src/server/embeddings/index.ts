@@ -17,8 +17,10 @@ export function getEmbedder(): Promise<Embedder> {
         throw new Error('EMBEDDING_PROVIDER=gemini needs GEMINI_API_KEY and GEMINI_EMBED_MODEL');
       }
       const { GeminiEmbedder } = await import('./gemini');
-      return new GeminiEmbedder(e.GEMINI_API_KEY, e.GEMINI_EMBED_MODEL);
+      return new GeminiEmbedder(e.GEMINI_API_KEY, e.GEMINI_EMBED_MODEL, e.GEMINI_EMBED_DIMENSIONS);
     }
+    // The local model's binaries are excluded from the serverless build, so fail with a clear message.
+    if (process.env.VERCEL) throw new Error('Set EMBEDDING_PROVIDER=gemini: the local embedding model does not run on Vercel');
     const { LocalEmbedder } = await import('./local');
     return new LocalEmbedder();
   })();

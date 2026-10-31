@@ -5,6 +5,8 @@ const schema = z.object({
   APP_ORIGIN: z.string().url().optional(),
   EMBEDDING_PROVIDER: z.enum(['local', 'gemini']).default('local'),
   GEMINI_EMBED_MODEL: z.string().optional(),
+  /** Optional smaller vector size (768, 1536 or 3072 are recommended). Smaller means cheaper storage. */
+  GEMINI_EMBED_DIMENSIONS: z.coerce.number().int().min(64).max(3072).optional(),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().optional(),
   AI_DAILY_CALL_LIMIT: z.coerce.number().int().min(0).default(300),

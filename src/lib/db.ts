@@ -9,6 +9,8 @@ export function sql(): Sql {
   if (!globalForDb.__animuSql) {
     globalForDb.__animuSql = postgres(env().DATABASE_URL, {
       max: 5,
+      // Neon's pooled connection runs PgBouncer in transaction mode, which cannot reuse prepared statements.
+      prepare: false,
       onnotice: () => {},
       // bigserial ids come back as numbers (they never approach 2^53 here).
       types: { bigint: { to: 20, from: [20], serialize: (x: unknown) => String(x), parse: (x: string) => Number(x) } },

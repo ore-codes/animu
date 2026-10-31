@@ -8,7 +8,7 @@ if (!url) {
   process.exit(1);
 }
 
-const db = postgres(url, { max: 1, onnotice: () => {} });
+const db = postgres(url, { max: 1, prepare: false, onnotice: () => {} });
 const dir = path.join(process.cwd(), 'db', 'migrations');
 
 await db`create table if not exists schema_migration (name text primary key, applied_at timestamptz not null default now())`;

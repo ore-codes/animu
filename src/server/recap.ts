@@ -1,15 +1,14 @@
-import { SchemaType, type Schema } from '@google/generative-ai';
 import { sql } from '@/lib/db';
 import { aiEnabled, env } from '@/lib/env';
-import { generateJson } from './ai';
+import { generateJson, type JsonSchema } from './ai';
 import { firstSentences } from './ingest/text';
 import { consumeAiBudget } from './limits';
 
 export type Recap = { order: number; title: string; kind: string; recap: string; source: 'ai' | 'synopsis' };
 
-const schema: Schema = {
-  type: SchemaType.OBJECT,
-  properties: { recap: { type: SchemaType.STRING } },
+const schema: JsonSchema = {
+  type: 'OBJECT',
+  properties: { recap: { type: 'STRING' } },
   required: ['recap'],
 };
 

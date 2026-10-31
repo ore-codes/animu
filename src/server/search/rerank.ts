@@ -1,18 +1,17 @@
-import { SchemaType, type Schema } from '@google/generative-ai';
-import { generateJson } from '../ai';
+import { generateJson, type JsonSchema } from '../ai';
 import type { Candidate } from './find';
 
-const schema: Schema = {
-  type: SchemaType.OBJECT,
+const schema: JsonSchema = {
+  type: 'OBJECT',
   properties: {
     ranked: {
-      type: SchemaType.ARRAY,
+      type: 'ARRAY',
       items: {
-        type: SchemaType.OBJECT,
+        type: 'OBJECT',
         properties: {
-          order: { type: SchemaType.INTEGER },
-          confidence: { type: SchemaType.STRING, format: 'enum', enum: ['high', 'medium', 'low'] },
-          reason: { type: SchemaType.STRING },
+          order: { type: 'INTEGER' },
+          confidence: { type: 'STRING', format: 'enum', enum: ['high', 'medium', 'low'] },
+          reason: { type: 'STRING' },
         },
         required: ['order', 'confidence', 'reason'],
       },
