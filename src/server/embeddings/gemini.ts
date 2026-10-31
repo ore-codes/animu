@@ -3,15 +3,29 @@ import type { Embedder } from './index';
 const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 const BATCH = 100;
 
+const MAX_ATTEMPTS = 6;
+
+/** Google says how long to wait ("Please retry in 56.5s") when a per-minute quota is hit. */
+function retryDelayMs(text: string, attempt: number) {
+  const hinted = /retry in ([\d.]+)s/i.exec(text)?.[1];
+  const seconds = hinted ? Number(hinted) + 1 : 2 ** attempt;
+  return Math.min(seconds, 70) * 1000;
+}
+
 async function post<T>(url: string, key: string, body: unknown): Promise<T> {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(30_000),
-  });
-  if (!res.ok) throw new Error(`Gemini embeddings returned ${res.status}`);
-  return (await res.json()) as T;
+  for (let attempt = 1; ; attempt++) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (res.ok) return (await res.json()) as T;
+    const retryable = res.status === 429 || res.status >= 500;
+    if (!retryable || attempt === MAX_ATTEMPTS) throw new Error(`Gemini embeddings returned ${res.status}`);
+    const delay = retryDelayMs(await res.text(), attempt);
+    await new Promise((r) => setTimeout(r, delay));
+  }
 }
 
 /** Hosted embeddings for production. Check it with `npm run check:gemini` before deploying. */
