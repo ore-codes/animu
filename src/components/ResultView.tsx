@@ -122,6 +122,19 @@ export function ResultView({ tvmazeId, query }: { tvmazeId: number; query: strin
         </Link>
       </div>
 
+      {result.notice && (
+        <div className="notice" role="status" style={{ marginBottom: 24 }}>
+          <span className="chip chip-kinari">
+            <span className="note">ちょっと休憩</span> {result.notice === 'ai_budget' ? 'Busy today' : 'Resting'}
+          </span>
+          <span>
+            {result.notice === 'ai_budget'
+              ? 'We hit today’s limit for the smarter ranking, so these results use meaning search only. Read each description before you trust it.'
+              : 'The smarter ranking didn’t answer, so these results use meaning search only. Read each description before you trust it.'}
+          </span>
+        </div>
+      )}
+
       <div className="result-cols">
         <div className="result-main">
           {!best ? (
@@ -147,7 +160,7 @@ export function ResultView({ tvmazeId, query }: { tvmazeId: number; query: strin
 
                 <div className="best-head">
                   <Ribbon order={best.order} small />
-                  <div style={{ flex: '1 1 260px', minWidth: 0 }}>
+                  <div style={{ flex: '1 1 180px', minWidth: 0 }}>
                     <div className="eyebrow">
                       {title} · {confident ? 'Best match' : skipped > 0 ? 'Next closest' : 'Closest match'}
                     </div>

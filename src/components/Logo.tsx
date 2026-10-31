@@ -8,22 +8,23 @@ export function BookmarkIcon({ size = 22, fill = 'var(--kaki)' }: { size?: numbe
   );
 }
 
-export function Header({ nav = true }: { nav?: boolean }) {
+/** With `action`, the right side is a single button (for example "Cancel") instead of the page links. */
+export function Header({ action }: { action?: string }) {
   return (
     <header className="site-header">
       <Link href="/" className="logo">
         <BookmarkIcon />
         Animu
       </Link>
-      {nav ? (
+      {action ? (
+        <Link href="/" className="btn btn-small" style={{ background: 'var(--page)' }}>
+          {action}
+        </Link>
+      ) : (
         <nav className="site-nav" aria-label="Main">
           <Link href="/#bookmarks">My bookmarks</Link>
           <Link href="/#how">How it works</Link>
         </nav>
-      ) : (
-        <Link href="/" className="btn btn-small" style={{ background: 'var(--page)' }}>
-          New search
-        </Link>
       )}
     </header>
   );
@@ -42,14 +43,8 @@ export function Footer() {
 export function Ribbon({ order, small = false }: { order: number; small?: boolean }) {
   return (
     <div className={`ribbon${small ? ' ribbon-sm' : ''}`} aria-hidden="true">
-      <span className="display" style={{ fontSize: small ? 32 : 40, letterSpacing: '0.06em' }}>
-        第{order}話
-      </span>
-      {!small && (
-        <span className="note" style={{ fontSize: 16 }}>
-          あなたはここ
-        </span>
-      )}
+      <span className="display">第{order}話</span>
+      {!small && <span className="note">あなたはここ</span>}
     </div>
   );
 }

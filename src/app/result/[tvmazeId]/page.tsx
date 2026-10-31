@@ -17,7 +17,7 @@ export default async function ResultPage({
   if (q.length < 3) redirect('/');
   return (
     <>
-      <Header nav={false} />
+      <Header action="New search" />
       <ResultView tvmazeId={id} query={q} />
     </>
   );

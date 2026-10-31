@@ -16,7 +16,7 @@ export default async function PreparePage({
   const { q = '', title = 'this show' } = await searchParams;
   return (
     <>
-      <Header nav={false} />
+      <Header action="Cancel" />
       <PrepareView tvmazeId={id} title={title.slice(0, 120)} query={q.slice(0, 300)} />
     </>
   );

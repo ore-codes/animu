@@ -106,10 +106,17 @@ export function Finder() {
             <div aria-live="polite">
               {searching && <p className="hint">Looking…</p>}
               {searchError && <p className="field-error">We couldn’t search just now. Try again in a moment.</p>}
-              {hits && hits.length === 0 && !searching && (
-                <p className="hint">No anime with that name. Check the spelling, or try the original Japanese title.</p>
-              )}
             </div>
+            {hits && hits.length === 0 && !searching && (
+              <div className="notice" style={{ marginTop: 10, background: 'var(--sakura)' }} role="status">
+                <span className="chip chip-sakura">
+                  <span className="note">あれ？</span> Not found
+                </span>
+                <span>
+                  We don’t have a show called “{text.trim()}”. Check the spelling, or try the original Japanese title.
+                </span>
+              </div>
+            )}
             {hits && hits.length > 0 && (
               <ul className="results">
                 {hits.map((s) => (

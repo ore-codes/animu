@@ -23,6 +23,8 @@ export type FindResult = {
   matches: Match[];
   /** The next episodes after the best match: number and kind only, never titles or synopses. */
   upcoming: { order: number; kind: string }[];
+  /** Set when AI ranking is configured but was not used, so the interface can say why. */
+  notice?: 'ai_budget' | 'ai_error';
 };
 
 const normalise = (q: string) => q.trim().replace(/\s+/g, ' ').toLowerCase();
@@ -51,7 +53,10 @@ export async function findEpisodes(franchiseId: number, query: string, title: st
   let ordered: Match[] = candidates.slice(0, RESULTS);
   let mode: FindResult['mode'] = 'basic';
 
-  if (wantAi && (await consumeAiBudget())) {
+  let notice: FindResult['notice'];
+
+  if (wantAi && !(await consumeAiBudget())) notice = 'ai_budget';
+  else if (wantAi) {
     try {
       const ranked = await rerank(title, query, candidates);
       if (ranked.length > 0) {
@@ -64,6 +69,7 @@ export async function findEpisodes(franchiseId: number, query: string, title: st
       }
     } catch (err) {
       console.error('rerank failed, using meaning search only', err);
+      notice = 'ai_error';
     }
   }
 
@@ -73,7 +79,7 @@ export async function findEpisodes(franchiseId: number, query: string, title: st
     where franchise_id = ${franchiseId} and global_order > ${best.order}
     order by global_order limit 5`;
 
-  const result: FindResult = { mode, matches: ordered, upcoming };
+  const result: FindResult = { mode, matches: ordered, upcoming, ...(notice && { notice }) };
   // Only cache what the cache key promises: a basic result must not be stored under the ai key.
   if (mode === cacheMode) {
     await db`
