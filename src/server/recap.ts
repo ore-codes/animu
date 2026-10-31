@@ -28,28 +28,26 @@ export async function recapsBefore(franchiseId: number, upTo: number, count: num
     where e.franchise_id = ${franchiseId} and e.global_order < ${upTo}
     order by e.global_order desc limit ${count}`;
 
-  const out: Recap[] = [];
-  for (const row of rows.reverse()) {
-    if (row.recap) {
-      out.push({ order: row.order, title: row.title, kind: row.kind, recap: row.recap, source: 'ai' });
-      continue;
-    }
-    let recap = firstSentences(row.synopsis, 3);
-    let source: Recap['source'] = 'synopsis';
-    if (aiEnabled() && (await consumeAiBudget())) {
-      try {
-        const res = await generateJson<{ recap: string }>(SYSTEM, `Episode ${row.order}: ${row.title}\n${row.synopsis}`, schema);
-        const text = String(res.recap ?? '').trim().slice(0, 700);
-        if (text) {
-          recap = text;
-          source = 'ai';
-          await db`insert into recap_cache (episode_id, recap, model) values (${row.id}, ${text}, ${env().GEMINI_MODEL ?? ''}) on conflict do nothing`;
+  // Episodes are independent, so generate the uncached ones at the same time.
+  return Promise.all(
+    rows.reverse().map(async (row): Promise<Recap> => {
+      if (row.recap) return { order: row.order, title: row.title, kind: row.kind, recap: row.recap, source: 'ai' };
+      let recap = firstSentences(row.synopsis, 3);
+      let source: Recap['source'] = 'synopsis';
+      if (aiEnabled() && (await consumeAiBudget())) {
+        try {
+          const res = await generateJson<{ recap: string }>(SYSTEM, `Episode ${row.order}: ${row.title}\n${row.synopsis}`, schema);
+          const text = String(res.recap ?? '').trim().slice(0, 700);
+          if (text) {
+            recap = text;
+            source = 'ai';
+            await db`insert into recap_cache (episode_id, recap, model) values (${row.id}, ${text}, ${env().GEMINI_MODEL ?? ''}) on conflict do nothing`;
+          }
+        } catch (err) {
+          console.error('recap generation failed, using synopsis excerpt', err);
         }
-      } catch (err) {
-        console.error('recap generation failed, using synopsis excerpt', err);
       }
-    }
-    out.push({ order: row.order, title: row.title, kind: row.kind, recap, source });
-  }
-  return out;
+      return { order: row.order, title: row.title, kind: row.kind, recap, source };
+    }),
+  );
 }

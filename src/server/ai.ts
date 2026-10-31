@@ -11,6 +11,9 @@ export type JsonSchema = {
 };
 
 const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+const TIMEOUT_MS = 12_000;
+const ATTEMPTS = 3;
+const RETRYABLE = (status: number) => status === 404 || status === 429 || status >= 500;
 
 type GenerateResponse = { candidates?: { content?: { parts?: { text?: string }[] } }[] };
 
@@ -19,16 +22,24 @@ export async function generateJson<T>(system: string, prompt: string, schema: Js
   const { GEMINI_API_KEY, GEMINI_MODEL } = env();
   if (!GEMINI_API_KEY || !GEMINI_MODEL) throw new Error('AI is not configured');
 
-  const res = await fetch(`${BASE}/${GEMINI_MODEL}:generateContent`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature: 0.2 },
-    }),
-    signal: AbortSignal.timeout(30_000),
-  });
+  const request = () =>
+    fetch(`${BASE}/${GEMINI_MODEL}:generateContent`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json', responseSchema: schema, temperature: 0.2 },
+      }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+
+  // The endpoint sometimes answers 404, 429 or 5xx for a model that works a moment later.
+  let res = await request();
+  for (let attempt = 1; !res.ok && RETRYABLE(res.status) && attempt < ATTEMPTS; attempt++) {
+    await new Promise((r) => setTimeout(r, 500 * attempt));
+    res = await request();
+  }
   if (!res.ok) throw new Error(`Gemini generateContent returned ${res.status}`);
 
   const data = (await res.json()) as GenerateResponse;
