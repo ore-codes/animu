@@ -2,7 +2,15 @@
 
 Find the episode you left off at. Pick a show, describe a scene you half remember, and Animu names the likely episode with no spoilers past it.
 
-This branch is the v2 backend. The interface is not built yet; the designs are in `docs/DESIGN.md`.
+**Live at [animu.net](https://animu.net)**
+
+- Describe a half-remembered scene and get up to 3 matching episodes, each with a confidence and a one-line reason.
+- Bookmark your place. It is saved in your browser, with no account.
+- See every episode of the show in one strip, with what you have watched and your bookmark marked.
+- Read short "previously on" recaps of the episodes before your bookmark.
+- Nothing past your match is shown: upcoming episodes appear as numbers only, never titles or plot.
+
+Popular shows are ready instantly. Any other anime is read on demand and takes about a minute the first time. The designs are in `docs/DESIGN.md`.
 
 ## How it works
 
@@ -33,6 +41,7 @@ npm run dev
 | `GET /api/shows/:id` | Status and progress while preparing |
 | `POST /api/find` | `{ tvmazeId, query }` returns up to 3 matches and the kinds of the next 5 episodes |
 | `GET /api/shows/:id/recap?upTo=N&count=3` | Recaps for the episodes before N |
+| `GET /api/shows/:id/map` | Episode count and which episodes are recap or filler, for the episode strip |
 | `GET /api/shows/:id/upcoming?after=N&reveal=1` | Next 5 episodes; titles only when revealed |
 
 POST routes only accept the site's own origin. Every route is rate limited per address, and AI calls stop at `AI_DAILY_CALL_LIMIT` per day, after which results fall back to meaning search only.
