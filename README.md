@@ -58,6 +58,10 @@ npm run calibrate                                           # score the spike sc
 
 Development uses a small local model. Production should use the hosted provider (`EMBEDDING_PROVIDER=gemini`) because the local model is too heavy for a serverless function. Vectors record which model made them, and search only compares vectors from the current model, so switching means re-running ingest for every show.
 
+## Contributing
+
+Bad matches, bugs and ideas are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and guidelines, and [SECURITY.md](SECURITY.md) to report a vulnerability.
+
 ## License
 
-MIT
+[MIT](LICENSE)

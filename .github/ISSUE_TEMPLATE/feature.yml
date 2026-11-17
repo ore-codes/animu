@@ -1,0 +1,14 @@
+name: Idea
+description: Suggest something Animu could do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What problem does it solve
