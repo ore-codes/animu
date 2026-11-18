@@ -1,0 +1,31 @@
+name: Dependabot merge
+
+# Patch and minor updates merge on their own once CI passes. Major updates wait for a person.
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Wait for CI, then merge
+        if: steps.meta.outputs.update-type != 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          for i in $(seq 1 30); do
+            state=$(gh pr checks "$PR_URL" --json name,state -q '[.[] | select(.name=="check") | .state][0]' || true)
+            [ "$state" = "SUCCESS" ] && gh pr merge "$PR_URL" --squash && exit 0
+            [ "$state" = "FAILURE" ] && echo "CI failed, leaving this PR for a person" && exit 0
+            sleep 20
+          done
+          echo "CI did not finish in time, leaving this PR for a person"
