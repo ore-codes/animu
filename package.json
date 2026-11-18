@@ -16,7 +16,7 @@
     "check:gemini": "tsx --env-file=.env scripts/check-gemini.ts"
   },
   "dependencies": {
-    "@huggingface/transformers": "^3.7.0",
+    "@huggingface/transformers": "^4.3.2",
     "next": "^16.4.6",
     "postgres": "^4.1.1",
     "react": "^19.2.0",
