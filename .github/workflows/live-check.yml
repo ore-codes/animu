@@ -1,0 +1,50 @@
+name: Live check
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - id: run
+        run: node scripts/smoke.mjs 2>&1 | tee smoke.log
+      - name: Open or update an outage issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          body="The daily live check against animu.net failed.
+
+          \`\`\`
+          $(grep -E '^(FAIL|[0-9]+ check)' smoke.log)
+          \`\`\`
+
+          Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+
+          Usual causes: the Gemini model is overloaded or renamed (GEMINI_MODEL), the Gemini prepay balance is empty, or TVmaze or Kitsu changed. This issue closes itself when the check passes again."
+          gh label create outage --color B60205 --description "Live check failed" 2>/dev/null || true
+          existing=$(gh issue list --label outage --state open --json number -q '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "Live check failed" --label outage --body "$body"
+          fi
+      - name: Close the outage issue once healthy
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --label outage --state open --json number -q '.[].number'); do
+            gh issue close "$n" --comment "The live check passes again."
+          done
